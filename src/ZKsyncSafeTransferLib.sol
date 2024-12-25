@@ -24,9 +24,6 @@ library ZKsyncSafeTransferLib {
     /*                         CONSTANTS                          */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    /// @dev Suggested gas stipend for contract receiving ETH that disallows any storage writes.
-    uint256 internal constant GAS_STIPEND_NO_STORAGE_WRITES = 2300;
-
     /// @dev Suggested gas stipend for contract receiving ETH to perform a few
     /// storage reads and writes, but low enough to prevent griefing.
     uint256 internal constant GAS_STIPEND_NO_GRIEF = 1000000;
