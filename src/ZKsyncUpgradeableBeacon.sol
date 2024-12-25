@@ -55,6 +55,7 @@ contract ZKsyncUpgradeableBeacon {
     fallback() external virtual {
         uint256 deployer = __deployer;
         assembly {
+            mstore(0x40, 0)
             if iszero(eq(caller(), deployer)) {
                 mstore(0x00, 0x82b42900) // `Unauthorized()`.
                 revert(0x1c, 0x04)

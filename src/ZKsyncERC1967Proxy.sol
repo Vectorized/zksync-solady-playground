@@ -46,6 +46,7 @@ contract ZKsyncERC1967Proxy {
     fallback() external payable virtual {
         uint256 deployer = __deployer;
         assembly {
+            mstore(0x40, 0)
             // For the special case of 1-byte calldata, return the implementation.
             if eq(calldatasize(), 1) {
                 mstore(0x00, sload(_ERC1967_IMPLEMENTATION_SLOT))
