@@ -47,7 +47,7 @@ library ZKsyncSafeTransferLib {
             }
             success := call(gasStipend, to, amount, 0x00, 0x00, 0x00, 0x00)
         }
-        if (success == uint(0)) {
+        if (success == uint256(0)) {
             vault = address(new ZKsyncSingleUseETHVault{value: amount}(to));
             emit SingleUseETHVaultCreated(to, amount, vault);
         }

@@ -16,7 +16,7 @@ contract Griefer {
     }
 
     function execute(address to, bytes memory data) public {
-        (bool success, ) = to.call(data);
+        (bool success,) = to.call(data);
         require(success);
     }
 
@@ -26,7 +26,7 @@ contract Griefer {
             if (n > 0xffffffff) revert();
             for (uint256 i; i < n; ++i) {
                 _junk.push(i);
-            }    
+            }
         }
     }
 
@@ -41,7 +41,7 @@ contract Griefer {
 
 contract ZKsyncSafeTransferLibTest is Test {
     Griefer public griefer;
-    
+
     function setUp() public {
         griefer = new Griefer();
     }
@@ -65,14 +65,14 @@ contract ZKsyncSafeTransferLibTest is Test {
 
         griefer.setReceiveNumLoops(0);
         griefer.execute(vault, "");
-        assertEq(address(griefer).balance, 0.3 ether);        
+        assertEq(address(griefer).balance, 0.3 ether);
 
         griefer.setReceiveNumLoops(1 << 128);
         vault = ZKsyncSafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
 
         griefer.setReceiveNumLoops(0);
         griefer.execute(vault, abi.encodePacked(address(griefer)));
-        assertEq(address(griefer).balance, 0.4 ether);        
+        assertEq(address(griefer).balance, 0.4 ether);
 
         address anotherRecipient = address(new Griefer());
 
@@ -81,6 +81,6 @@ contract ZKsyncSafeTransferLibTest is Test {
 
         griefer.setReceiveNumLoops(0);
         griefer.execute(vault, abi.encodePacked(address(anotherRecipient)));
-        assertEq(address(anotherRecipient).balance, 0.1 ether);        
+        assertEq(address(anotherRecipient).balance, 0.1 ether);
     }
 }
