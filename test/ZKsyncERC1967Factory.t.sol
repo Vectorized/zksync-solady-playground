@@ -25,7 +25,6 @@ contract ZKsyncERC1967FactoryTest is Test {
     SampleImplementation public implementation;
 
     event LogBytes32(bytes32 x);
-
     event LogBytes(bytes x);
 
     function setUp() public {
