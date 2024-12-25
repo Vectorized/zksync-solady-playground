@@ -55,7 +55,6 @@ contract ZKsyncUpgradeableBeacon {
     /// @dev Returns the implementation stored in the beacon.
     /// See: https://eips.ethereum.org/EIPS/eip-1967#beacon-contract-address
     function implementation() public view returns (address result) {
-        /// @solidity memory-safe-assembly
         assembly {
             result := sload(_UPGRADEABLE_BEACON_IMPLEMENTATION_SLOT)
         }

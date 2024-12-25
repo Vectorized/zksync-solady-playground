@@ -109,6 +109,7 @@ contract ZKsyncERC1967Factory {
                 revert(0x1c, 0x04)
             }
             sstore(instance, admin)
+            // Emit the {AdminChanged} event.
             log3(0x00, 0x00, _ADMIN_CHANGED_EVENT_SIGNATURE, instance, admin)
         }
     }
@@ -145,6 +146,7 @@ contract ZKsyncERC1967Factory {
                 returndatacopy(0x00, 0x00, returndatasize())
                 revert(0x00, returndatasize())
             }
+            // Emit the {Upgraded} event.
             log3(0x00, 0x00, _UPGRADED_EVENT_SIGNATURE, instance, implementation)
         }
     }
@@ -167,7 +169,7 @@ contract ZKsyncERC1967Factory {
         payable
         returns (address)
     {
-        return _deploy(0, uint160(implementation), uint160(admin), bytes32(0), 0, data);
+        return _deploy(0, uint160(implementation), uint160(admin), "", 0, data);
     }
 
     /// @dev Deploys a proxy for `implementation`, with `admin`, `salt`,
@@ -199,7 +201,7 @@ contract ZKsyncERC1967Factory {
 
     /// @dev Deploys a beacon with `implementation` and `admin`, and returns its address.
     function deployBeacon(address implementation, address admin) public returns (address) {
-        return _deploy(1, uint160(implementation), uint160(admin), bytes32(0), 0, _emptyData());
+        return _deploy(1, uint160(implementation), uint160(admin), "", 0, _emptyData());
     }
 
     /// @dev Deploys a beacon with `implementation` and `admin`, with `salt`,
@@ -226,7 +228,7 @@ contract ZKsyncERC1967Factory {
     /// The value passed into this function will be forwarded to the beacon proxy.
     /// Then, calls the beacon proxy with abi encoded `data`.
     function deployBeaconProxyAndCall(address beacon, bytes calldata data) public payable returns (address) {
-        return _deploy(2, uint160(beacon), 0, bytes32(0), 0, data);
+        return _deploy(2, uint160(beacon), 0, "", 0, data);
     }
 
     /// @dev Deploys a beacon proxy referring to `beacon`, with `salt`,
