@@ -21,7 +21,8 @@ contract ZKsyncERC1967BeaconProxy {
 
     /// @dev The ERC-1967 storage slot for the implementation in the proxy.
     /// `uint256(keccak256("eip1967.proxy.implementation")) - 1`.
-    bytes32 internal constant _ERC1967_BEACON_SLOT = 0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50;
+    bytes32 internal constant _ERC1967_BEACON_SLOT =
+        0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         IMMUTABLES                         */

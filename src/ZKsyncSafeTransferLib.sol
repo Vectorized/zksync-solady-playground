@@ -34,7 +34,10 @@ library ZKsyncSafeTransferLib {
 
     /// @dev Force sends `amount` (in wei) ETH to `to`, with a `gasStipend`.
     /// If force transfer is used, returns the vault. Else returns `address(0)`.
-    function forceSafeTransferETH(address to, uint256 amount, uint256 gasStipend) internal returns (address vault) {
+    function forceSafeTransferETH(address to, uint256 amount, uint256 gasStipend)
+        internal
+        returns (address vault)
+    {
         uint256 success;
         /// @solidity memory-safe-assembly
         assembly {
@@ -52,7 +55,10 @@ library ZKsyncSafeTransferLib {
 
     /// @dev Force sends all the ETH in the current contract to `to`, with a `gasStipend`.
     /// If force transfer is used, returns the vault. Else returns `address(0)`.
-    function forceSafeTransferAllETH(address to, uint256 gasStipend) internal returns (address vault) {
+    function forceSafeTransferAllETH(address to, uint256 gasStipend)
+        internal
+        returns (address vault)
+    {
         vault = forceSafeTransferETH(to, address(this).balance, gasStipend);
     }
 

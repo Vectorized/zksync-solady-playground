@@ -62,7 +62,9 @@ contract ZKsyncERC1967FactoryTest is Test {
         assertEq(SampleImplementation(instance).version(), 1);
         assertGt(instance.code.length, 0);
 
-        factory.upgradeAndCall(instance, implementation2, abi.encodeWithSignature("setX(uint256)", uint256(456)));
+        factory.upgradeAndCall(
+            instance, implementation2, abi.encodeWithSignature("setX(uint256)", uint256(456))
+        );
         assertEq(SampleImplementation(instance).x(), 456);
         assertEq(SampleImplementation(instance).version(), 2);
     }

@@ -35,10 +35,14 @@ contract ZKsyncERC1967Factory {
     event Upgraded(address indexed instance, address indexed implementation);
 
     /// @dev A proxy has been deployed.
-    event ProxyDeployed(address indexed proxy, address indexed implementation, address indexed admin);
+    event ProxyDeployed(
+        address indexed proxy, address indexed implementation, address indexed admin
+    );
 
     /// @dev A beacon has been deployed.
-    event BeaconDeployed(address indexed beacon, address indexed implementation, address indexed admin);
+    event BeaconDeployed(
+        address indexed beacon, address indexed implementation, address indexed admin
+    );
 
     /// @dev A beacon proxy has been deployed.
     event BeaconProxyDeployed(address indexed beaconProxy, address indexed beacon);
@@ -129,7 +133,10 @@ contract ZKsyncERC1967Factory {
     /// Then, calls it with abi encoded `data`.
     /// The caller of this function must be the admin of `instance`.
     /// Works for both proxies and beacons.
-    function upgradeAndCall(address instance, address implementation, bytes calldata data) public payable {
+    function upgradeAndCall(address instance, address implementation, bytes calldata data)
+        public
+        payable
+    {
         assembly {
             if iszero(eq(sload(instance), caller())) {
                 mstore(0x00, 0x82b42900) // `Unauthorized()`.
@@ -187,11 +194,12 @@ contract ZKsyncERC1967Factory {
     /// and returns its deterministic address.
     /// The value passed into this function will be forwarded to the proxy.
     /// Then, calls the proxy with abi encoded `data`.
-    function deployProxyDeterministicAndCall(address implementation, address admin, bytes32 salt, bytes calldata data)
-        public
-        payable
-        returns (address)
-    {
+    function deployProxyDeterministicAndCall(
+        address implementation,
+        address admin,
+        bytes32 salt,
+        bytes calldata data
+    ) public payable returns (address) {
         return _deploy(0, uint160(implementation), uint160(admin), salt, 1, data);
     }
 
@@ -227,14 +235,22 @@ contract ZKsyncERC1967Factory {
     /// @dev Deploys a beacon proxy referring to `beacon`, and returns its address.
     /// The value passed into this function will be forwarded to the beacon proxy.
     /// Then, calls the beacon proxy with abi encoded `data`.
-    function deployBeaconProxyAndCall(address beacon, bytes calldata data) public payable returns (address) {
+    function deployBeaconProxyAndCall(address beacon, bytes calldata data)
+        public
+        payable
+        returns (address)
+    {
         return _deploy(2, uint160(beacon), 0, "", 0, data);
     }
 
     /// @dev Deploys a beacon proxy referring to `beacon`, with `salt`,
     /// and returns its deterministic address.
     /// The value passed into this function will be forwarded to the beacon proxy.
-    function deployBeaconProxyDeterministic(address beacon, bytes32 salt) public payable returns (address) {
+    function deployBeaconProxyDeterministic(address beacon, bytes32 salt)
+        public
+        payable
+        returns (address)
+    {
         return deployBeaconProxyDeterministicAndCall(beacon, salt, _emptyData());
     }
 
@@ -242,11 +258,11 @@ contract ZKsyncERC1967Factory {
     /// and returns its deterministic address.
     /// The value passed into this function will be forwarded to the beacon proxy.
     /// Then, calls the beacon proxy with abi encoded `data`.
-    function deployBeaconProxyDeterministicAndCall(address beacon, bytes32 salt, bytes calldata data)
-        public
-        payable
-        returns (address)
-    {
+    function deployBeaconProxyDeterministicAndCall(
+        address beacon,
+        bytes32 salt,
+        bytes calldata data
+    ) public payable returns (address) {
         return _deploy(2, uint160(beacon), 0, salt, 1, data);
     }
 
@@ -256,10 +272,18 @@ contract ZKsyncERC1967Factory {
 
     /// @dev Returns the address of the instance deployed with `salt`.
     /// `instanceHash` is one of `proxyHash`, `beaconProxyHash`, `beaconHash`.
-    function predictDeterministicAddress(bytes32 instanceHash, bytes32 salt) public view returns (address) {
+    function predictDeterministicAddress(bytes32 instanceHash, bytes32 salt)
+        public
+        view
+        returns (address)
+    {
         bytes32 h = keccak256(
             abi.encode(
-                keccak256("zksyncCreate2"), bytes32(uint256(uint160(address(this)))), salt, instanceHash, keccak256("")
+                keccak256("zksyncCreate2"),
+                bytes32(uint256(uint160(address(this)))),
+                salt,
+                instanceHash,
+                keccak256("")
             )
         );
         return address(uint160(uint256(h)));

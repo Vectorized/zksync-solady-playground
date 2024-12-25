@@ -7,4 +7,7 @@ remappings = [
     "forge-zksync-std/=lib/forge-zksync-std/src/",
 ]
 
+[fmt]
+line_length = 100 # While we allow up to 120, we lint at 100 for readability.
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
