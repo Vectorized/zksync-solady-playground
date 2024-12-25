@@ -26,14 +26,6 @@ contract ZKsyncUpgradeableBeacon {
         0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
-    /*                          STORAGE                           */
-    /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
-
-    /// @dev The storage slot for the implementation address.
-    /// `uint72(bytes9(keccak256("_UPGRADEABLE_BEACON_IMPLEMENTATION_SLOT")))`.
-    uint256 internal constant _UPGRADEABLE_BEACON_IMPLEMENTATION_SLOT = 0x911c5a209f08d5ec5e;
-
-    /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                         IMMUTABLES                         */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
@@ -56,7 +48,7 @@ contract ZKsyncUpgradeableBeacon {
     /// See: https://eips.ethereum.org/EIPS/eip-1967#beacon-contract-address
     function implementation() public view returns (address result) {
         assembly {
-            result := sload(_UPGRADEABLE_BEACON_IMPLEMENTATION_SLOT)
+            result := sload(0)
         }
     }
 
@@ -72,9 +64,9 @@ contract ZKsyncUpgradeableBeacon {
                 mstore(0x00, 0x6d3e283b) // `NewImplementationHasNoCode()`.
                 revert(0x1c, 0x04)
             }
-            sstore(_UPGRADEABLE_BEACON_IMPLEMENTATION_SLOT, newImplementation)
+            sstore(0, newImplementation)
             // Emit the {Upgraded} event.
-            log2(codesize(), 0x00, _UPGRADED_EVENT_SIGNATURE, newImplementation)
+            log2(0x00, 0x00, _UPGRADED_EVENT_SIGNATURE, newImplementation)
         }
     }
 }

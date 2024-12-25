@@ -50,7 +50,7 @@ contract ZKsyncERC1967BeaconProxy {
             if eq(calldatasize(), 1) {
                 mstore(0x00, 0x5c60da1b) // `implementation()`.
                 let s := staticcall(gas(), sload(_ERC1967_BEACON_SLOT), 0x1c, 0x04, 0x00, 0x20)
-                if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
+                if iszero(and(gt(returndatasize(), 0x1f), s)) { invalid() }
                 return(0x00, 0x20) // Return the implementation.
             }
             // Deployer workflow.
@@ -58,21 +58,19 @@ contract ZKsyncERC1967BeaconProxy {
                 let newBeacon := calldataload(0x00)
                 sstore(_ERC1967_BEACON_SLOT, newBeacon)
                 // Emit the {Upgraded} event.
-                log2(codesize(), 0x00, _BEACON_UPGRADED_EVENT_SIGNATURE, newBeacon)
-                return(0x00, 0x00) // End the context.
+                log2(0x00, 0x00, _BEACON_UPGRADED_EVENT_SIGNATURE, newBeacon)
+                stop() // End the context.
             }
             // Query the beacon.
             mstore(0x00, 0x5c60da1b) // `implementation()`.
             let s := staticcall(gas(), sload(_ERC1967_BEACON_SLOT), 0x1c, 0x04, 0x00, 0x20)
-            if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
+            if iszero(and(gt(returndatasize(), 0x1f), s)) { invalid() }
             let implementation := mload(0x00)
             // Perform the delegatecall.
             calldatacopy(0x00, 0x00, calldatasize())
-            if iszero(delegatecall(gas(), implementation, 0x00, calldatasize(), 0x00, 0x00)) {
-                returndatacopy(0x00, 0x00, returndatasize())
-                revert(0x00, returndatasize())
-            }
+            s := delegatecall(gas(), implementation, 0x00, calldatasize(), 0x00, 0x00)
             returndatacopy(0x00, 0x00, returndatasize())
+            if iszero(s) { revert(0x00, returndatasize()) }
             return(0x00, returndatasize())
         }
     }

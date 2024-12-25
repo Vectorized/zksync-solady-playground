@@ -73,11 +73,9 @@ contract ZKsyncERC1967Proxy {
             // Perform the delegatecall.
             let implementation := sload(_ERC1967_IMPLEMENTATION_SLOT)
             calldatacopy(0x00, 0x00, calldatasize())
-            if iszero(delegatecall(gas(), implementation, 0x00, calldatasize(), 0x00, 0x00)) {
-                returndatacopy(0x00, 0x00, returndatasize())
-                revert(0x00, returndatasize())
-            }
+            let s := delegatecall(gas(), implementation, 0x00, calldatasize(), 0x00, 0x00)
             returndatacopy(0x00, 0x00, returndatasize())
+            if iszero(s) { revert(0x00, returndatasize()) }
             return(0x00, returndatasize())
         }
     }
