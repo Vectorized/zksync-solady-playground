@@ -47,6 +47,7 @@ contract ZKsyncUpgradeableBeacon {
     /// @dev Returns the implementation stored in the beacon.
     /// See: https://eips.ethereum.org/EIPS/eip-1967#beacon-contract-address
     function implementation() public view returns (address result) {
+        /// @solidity memory-safe-assembly
         assembly {
             result := sload(0)
         }
@@ -54,8 +55,9 @@ contract ZKsyncUpgradeableBeacon {
 
     fallback() external virtual {
         uint256 deployer = __deployer;
+        /// @solidity memory-safe-assembly
         assembly {
-            mstore(0x40, 0)
+            mstore(0x40, 0) // Optimization trick to remove free memory pointer initialization.
             if iszero(eq(caller(), deployer)) {
                 mstore(0x00, 0x82b42900) // `Unauthorized()`.
                 revert(0x1c, 0x04)

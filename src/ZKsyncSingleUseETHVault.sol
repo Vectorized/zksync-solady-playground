@@ -36,6 +36,7 @@ contract ZKsyncSingleUseETHVault {
     /// @dev Allows the owner to withdraw all ETH in this contract.
     function withdrawAll(address to) public {
         uint256 owner = __owner;
+        /// @solidity memory-safe-assembly
         assembly {
             if iszero(eq(caller(), owner)) {
                 mstore(0x00, 0x82b42900) // `Unauthorized()`.
@@ -51,9 +52,12 @@ contract ZKsyncSingleUseETHVault {
 
     fallback() external virtual {
         address to;
+        /// @solidity memory-safe-assembly
         assembly {
-            to := calldataload(0x00)
-            if lt(calldatasize(), 0x20) { to := shr(shl(3, sub(0x20, calldatasize())), to) }
+            to :=
+                shr(
+                    mul(lt(calldatasize(), 0x20), shl(3, sub(0x20, calldatasize()))), calldataload(0x00)
+                )
         }
         withdrawAll(to);
     }

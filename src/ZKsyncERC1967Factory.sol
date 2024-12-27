@@ -68,27 +68,20 @@ contract ZKsyncERC1967Factory {
         0xfa8e336138457120a1572efbe25f72698abd5cca1c9be0bce42ad406ff350a2b;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
-    /*                         IMMUTABLES                         */
+    /*                         CONSTANTS                          */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     /// @dev The hash of the proxy.
-    bytes32 public immutable proxyHash;
+    bytes32 public constant PROXY_HASH =
+        0x0100004d8534432ce0a7229cc6cac9aa833eb2589231e8939662416837694e8a;
 
     /// @dev The hash of the upgradeable beacon.
-    bytes32 public immutable beaconHash;
+    bytes32 public constant BEACON_HASH =
+        0x0100002d0bc930389ffd81937f66ebe008b128a47f6aa263d811dc315202775c;
 
     /// @dev The hash of the beacon proxy.
-    bytes32 public immutable beaconProxyHash;
-
-    /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
-    /*                        CONSTRUCTOR                         */
-    /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
-
-    constructor() payable {
-        proxyHash = _extcodehash(address(new ZKsyncERC1967Proxy()));
-        beaconHash = _extcodehash(address(new ZKsyncUpgradeableBeacon()));
-        beaconProxyHash = _extcodehash(address(new ZKsyncERC1967BeaconProxy()));
-    }
+    bytes32 public constant BEACON_PROXY_HASH =
+        0x01000053e562b6fe42b0bbd3807368359cf2e8d619941551ae2acfa30d449133;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                      ADMIN FUNCTIONS                       */
@@ -98,6 +91,7 @@ contract ZKsyncERC1967Factory {
     /// Returns `address(0)` if `instance` is a beacon proxy.
     /// Works for both proxies and beacons.
     function adminOf(address instance) public view returns (address admin) {
+        /// @solidity memory-safe-assembly
         assembly {
             admin := sload(instance)
         }
@@ -107,6 +101,7 @@ contract ZKsyncERC1967Factory {
     /// The caller of this function must be the admin of `instance`.
     /// Works for both proxies and beacons.
     function changeAdmin(address instance, address admin) public {
+        /// @solidity memory-safe-assembly
         assembly {
             if iszero(eq(sload(instance), caller())) {
                 mstore(0x00, 0x82b42900) // `Unauthorized()`.
@@ -137,6 +132,7 @@ contract ZKsyncERC1967Factory {
         public
         payable
     {
+        /// @solidity memory-safe-assembly
         assembly {
             if iszero(eq(sload(instance), caller())) {
                 mstore(0x00, 0x82b42900) // `Unauthorized()`.
@@ -271,7 +267,7 @@ contract ZKsyncERC1967Factory {
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     /// @dev Returns the address of the instance deployed with `salt`.
-    /// `instanceHash` is one of `proxyHash`, `beaconProxyHash`, `beaconHash`.
+    /// `instanceHash` is one of `PROXY_HASH`, `BEACON_PROXY_HASH`, `BEACON_HASH`.
     function predictDeterministicAddress(bytes32 instanceHash, bytes32 salt)
         public
         view
@@ -293,14 +289,14 @@ contract ZKsyncERC1967Factory {
     /// If `instance` is not deployed, returns `address(0)`.
     function implementationOf(address instance) public view returns (address result) {
         bytes32 h = _extcodehash(instance);
-        if (h == proxyHash || h == beaconProxyHash) {
-            assembly {
+        /// @solidity memory-safe-assembly
+        assembly {
+            if or(eq(h, PROXY_HASH), eq(h, BEACON_PROXY_HASH)) {
                 let s := staticcall(gas(), instance, 0x00, 0x01, 0x00, 0x20)
                 if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
                 result := mload(0x00)
             }
-        } else if (h == beaconHash) {
-            assembly {
+            if eq(h, BEACON_HASH) {
                 mstore(0x00, 0x5c60da1b) // `implementation()`.
                 let s := staticcall(gas(), instance, 0x1c, 0x04, 0x00, 0x20)
                 if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
@@ -326,6 +322,7 @@ contract ZKsyncERC1967Factory {
         if (codeType == 0) c = type(ZKsyncERC1967Proxy).creationCode;
         else if (codeType == 1) c = type(ZKsyncUpgradeableBeacon).creationCode;
         else c = type(ZKsyncERC1967BeaconProxy).creationCode;
+        /// @solidity memory-safe-assembly
         assembly {
             switch useSalt
             case 0 { instance := create(0, add(c, 0x20), mload(c)) }
@@ -378,6 +375,7 @@ contract ZKsyncERC1967Factory {
 
     /// @dev Helper function to return an empty bytes calldata.
     function _emptyData() internal pure returns (bytes calldata data) {
+        /// @solidity memory-safe-assembly
         assembly {
             data.length := 0
         }
@@ -385,6 +383,7 @@ contract ZKsyncERC1967Factory {
 
     /// @dev Returns the hash of `instance`.
     function _extcodehash(address instance) internal view returns (bytes32 result) {
+        /// @solidity memory-safe-assembly
         assembly {
             result := extcodehash(instance)
         }

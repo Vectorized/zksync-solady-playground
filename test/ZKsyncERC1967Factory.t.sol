@@ -52,7 +52,7 @@ contract ZKsyncERC1967FactoryTest is Test {
 
     function testDeployDeterministicAndUpgrade() public {
         bytes32 salt = 0x0000000000000000000000000000000000000000ff112233445566778899aabb;
-        address predicted = factory.predictDeterministicAddress(factory.proxyHash(), salt);
+        address predicted = factory.predictDeterministicAddress(factory.PROXY_HASH(), salt);
         assertEq(factory.implementationOf(predicted), address(0));
         address instance = factory.deployProxyDeterministic(implementation, address(this), salt);
         assertEq(factory.implementationOf(predicted), implementation);
@@ -71,14 +71,14 @@ contract ZKsyncERC1967FactoryTest is Test {
 
     function testDeployBeaconProxyDeterministicAndUpgrade() public {
         bytes32 salt = 0x0000000000000000000000000000000000000000ff112233445566778899aabb;
-        address predicted = factory.predictDeterministicAddress(factory.beaconHash(), salt);
+        address predicted = factory.predictDeterministicAddress(factory.BEACON_HASH(), salt);
         assertEq(factory.implementationOf(predicted), address(0));
         address beacon = factory.deployBeaconDeterministic(implementation, address(this), salt);
         assertEq(ZKsyncUpgradeableBeacon(beacon).implementation(), implementation);
         assertEq(factory.implementationOf(predicted), implementation);
         assertEq(predicted, beacon);
 
-        predicted = factory.predictDeterministicAddress(factory.beaconProxyHash(), salt);
+        predicted = factory.predictDeterministicAddress(factory.BEACON_PROXY_HASH(), salt);
         address beaconProxy = factory.deployBeaconProxyDeterministic(beacon, salt);
         assertEq(predicted, beaconProxy);
         assertEq(factory.implementationOf(beaconProxy), implementation);

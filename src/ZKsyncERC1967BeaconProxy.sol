@@ -45,8 +45,9 @@ contract ZKsyncERC1967BeaconProxy {
 
     fallback() external payable virtual {
         uint256 deployer = __deployer;
+        /// @solidity memory-safe-assembly
         assembly {
-            mstore(0x40, 0)
+            mstore(0x40, 0) // Optimization trick to remove free memory pointer initialization.
             // For the special case of 1-byte calldata, return the implementation.
             if eq(calldatasize(), 1) {
                 mstore(0x00, 0x5c60da1b) // `implementation()`.
@@ -56,10 +57,9 @@ contract ZKsyncERC1967BeaconProxy {
             }
             // Deployer workflow.
             if eq(caller(), deployer) {
-                let newBeacon := calldataload(0x00)
-                sstore(_ERC1967_BEACON_SLOT, newBeacon)
+                sstore(_ERC1967_BEACON_SLOT, calldataload(0x00))
                 // Emit the {Upgraded} event.
-                log2(0x00, 0x00, _BEACON_UPGRADED_EVENT_SIGNATURE, newBeacon)
+                log2(0x00, 0x00, _BEACON_UPGRADED_EVENT_SIGNATURE, calldataload(0x00))
                 stop() // End the context.
             }
             // Query the beacon.
