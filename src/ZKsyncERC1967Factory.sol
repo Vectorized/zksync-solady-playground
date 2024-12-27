@@ -288,9 +288,9 @@ contract ZKsyncERC1967Factory {
     /// @dev Returns the implementation of `instance`.
     /// If `instance` is not deployed, returns `address(0)`.
     function implementationOf(address instance) public view returns (address result) {
-        bytes32 h = _extcodehash(instance);
         /// @solidity memory-safe-assembly
         assembly {
+            let h := extcodehash(instance)
             if or(eq(h, PROXY_HASH), eq(h, BEACON_PROXY_HASH)) {
                 let s := staticcall(gas(), instance, 0x00, 0x01, 0x00, 0x20)
                 if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
@@ -378,14 +378,6 @@ contract ZKsyncERC1967Factory {
         /// @solidity memory-safe-assembly
         assembly {
             data.length := 0
-        }
-    }
-
-    /// @dev Returns the hash of `instance`.
-    function _extcodehash(address instance) internal view returns (bytes32 result) {
-        /// @solidity memory-safe-assembly
-        assembly {
-            result := extcodehash(instance)
         }
     }
 }
