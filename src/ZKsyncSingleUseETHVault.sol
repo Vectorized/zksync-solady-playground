@@ -15,11 +15,11 @@ contract ZKsyncSingleUseETHVault {
     error Unauthorized();
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
-    /*                         IMMUTABLES                         */
+    /*                          STORAGE                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     /// @dev For upgrades / initialization.
-    uint256 private immutable __owner;
+    uint256 private __owner;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                        CONSTRUCTOR                         */
@@ -33,32 +33,20 @@ contract ZKsyncSingleUseETHVault {
     /*                        WITHDRAW ALL                        */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    /// @dev Allows the owner to withdraw all ETH in this contract.
-    function withdrawAll(address to) public {
-        uint256 owner = __owner;
+    fallback() external payable virtual {
         /// @solidity memory-safe-assembly
         assembly {
-            if iszero(eq(caller(), owner)) {
+            if iszero(eq(caller(), sload(__owner.slot))) {
                 mstore(0x00, 0x82b42900) // `Unauthorized()`.
                 revert(0x1c, 0x04)
             }
-            if iszero(to) { to := caller() }
+            let to := calldataload(0x00)
+            to := shr(mul(lt(calldatasize(), 0x20), shl(3, sub(0x20, calldatasize()))), to)
+            to := xor(mul(xor(to, caller()), iszero(to)), to)
             if iszero(call(gas(), to, selfbalance(), 0x00, 0x00, 0x00, 0x00)) {
                 mstore(0x00, 0x651aee10) // `WithdrawAllFailed()`.
                 revert(0x1c, 0x04)
             }
         }
-    }
-
-    fallback() external virtual {
-        address to;
-        /// @solidity memory-safe-assembly
-        assembly {
-            to :=
-                shr(
-                    mul(lt(calldatasize(), 0x20), shl(3, sub(0x20, calldatasize()))), calldataload(0x00)
-                )
-        }
-        withdrawAll(to);
     }
 }

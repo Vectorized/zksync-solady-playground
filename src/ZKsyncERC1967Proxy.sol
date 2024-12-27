@@ -24,19 +24,20 @@ contract ZKsyncERC1967Proxy {
     bytes32 internal constant _ERC1967_IMPLEMENTATION_SLOT =
         0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
-    /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
-    /*                         IMMUTABLES                         */
-    /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
-
-    /// @dev For upgrades / initialization.
-    uint256 private immutable __deployer;
+    /// @dev The storage slot for the deployer.
+    /// `uint256(keccak256("ZKsyncERC1967Proxy.deployer")) - 1`.
+    bytes32 internal constant _ZKSYNC_ERC1967_PROXY_DEPLOYER_SLOT =
+        0x83aea57e05b1947e389ff216588717a5ffa47e2175df535893bc27b10acffeb2;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                        CONSTRUCTOR                         */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     constructor() payable {
-        __deployer = uint256(uint160(msg.sender));
+        /// @solidity memory-safe-assembly
+        assembly {
+            sstore(_ZKSYNC_ERC1967_PROXY_DEPLOYER_SLOT, caller())
+        }
     }
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
@@ -44,7 +45,6 @@ contract ZKsyncERC1967Proxy {
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     fallback() external payable virtual {
-        uint256 deployer = __deployer;
         /// @solidity memory-safe-assembly
         assembly {
             mstore(0x40, 0) // Optimization trick to remove free memory pointer initialization.
@@ -54,7 +54,7 @@ contract ZKsyncERC1967Proxy {
                 return(0x00, 0x20)
             }
             // Deployer workflow.
-            if eq(caller(), deployer) {
+            if eq(caller(), sload(_ZKSYNC_ERC1967_PROXY_DEPLOYER_SLOT)) {
                 let newImplementation := calldataload(0x00)
                 sstore(_ERC1967_IMPLEMENTATION_SLOT, newImplementation)
                 if gt(calldatasize(), 0x20) {
@@ -67,10 +67,8 @@ contract ZKsyncERC1967Proxy {
                     }
                 }
                 // Emit the {Upgraded} event.
-                log2(codesize(), 0x00, _UPGRADED_EVENT_SIGNATURE, newImplementation)
-                // Bubble up the return data (if any).
-                returndatacopy(0x00, 0x00, returndatasize())
-                return(0x00, returndatasize())
+                log2(0x00, 0x00, _UPGRADED_EVENT_SIGNATURE, newImplementation)
+                stop() // End the context.
             }
             // Perform the delegatecall.
             let implementation := sload(_ERC1967_IMPLEMENTATION_SLOT)

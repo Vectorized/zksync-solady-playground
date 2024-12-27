@@ -73,15 +73,15 @@ contract ZKsyncERC1967Factory {
 
     /// @dev The hash of the proxy.
     bytes32 public constant PROXY_HASH =
-        0x0100004d8534432ce0a7229cc6cac9aa833eb2589231e8939662416837694e8a;
+        0x01000041235eb6c6e003c5e0191695f009ed2590e899a662cb693bf85e8fb022;
 
     /// @dev The hash of the upgradeable beacon.
     bytes32 public constant BEACON_HASH =
-        0x0100002d0bc930389ffd81937f66ebe008b128a47f6aa263d811dc315202775c;
+        0x0100001901442d36d6e35ba0454223ed52727c75cb12e9646ea46ee78a24ae62;
 
     /// @dev The hash of the beacon proxy.
     bytes32 public constant BEACON_PROXY_HASH =
-        0x01000053e562b6fe42b0bbd3807368359cf2e8d619941551ae2acfa30d449133;
+        0x0100004dd6ba616b61acec35fbf9874af5fbc2691cfba34f6f47877ac601955a;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                      ADMIN FUNCTIONS                       */

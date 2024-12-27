@@ -24,19 +24,20 @@ contract ZKsyncERC1967BeaconProxy {
     bytes32 internal constant _ERC1967_BEACON_SLOT =
         0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50;
 
-    /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
-    /*                         IMMUTABLES                         */
-    /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
-
-    /// @dev For upgrades / initialization.
-    uint256 private immutable __deployer;
+    /// @dev The storage slot for the deployer.
+    /// `uint256(keccak256("ZKsyncERC1967BeaconProxy.deployer")) - 1`.
+    bytes32 internal constant _ZKSYNC_ERC1967_BEACON_PROXY_DEPLOYER_SLOT =
+        0xa08abcd16f24dd6a09927c103ca70de95c1c04921998d0dac6edddd21549ba2d;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                        CONSTRUCTOR                         */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     constructor() payable {
-        __deployer = uint256(uint160(msg.sender));
+        /// @solidity memory-safe-assembly
+        assembly {
+            sstore(_ZKSYNC_ERC1967_BEACON_PROXY_DEPLOYER_SLOT, caller())
+        }
     }
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
@@ -44,7 +45,6 @@ contract ZKsyncERC1967BeaconProxy {
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     fallback() external payable virtual {
-        uint256 deployer = __deployer;
         /// @solidity memory-safe-assembly
         assembly {
             mstore(0x40, 0) // Optimization trick to remove free memory pointer initialization.
@@ -52,11 +52,11 @@ contract ZKsyncERC1967BeaconProxy {
             if eq(calldatasize(), 1) {
                 mstore(0x00, 0x5c60da1b) // `implementation()`.
                 let s := staticcall(gas(), sload(_ERC1967_BEACON_SLOT), 0x1c, 0x04, 0x00, 0x20)
-                if iszero(and(gt(returndatasize(), 0x1f), s)) { invalid() }
+                if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
                 return(0x00, 0x20) // Return the implementation.
             }
             // Deployer workflow.
-            if eq(caller(), deployer) {
+            if eq(caller(), sload(_ZKSYNC_ERC1967_BEACON_PROXY_DEPLOYER_SLOT)) {
                 sstore(_ERC1967_BEACON_SLOT, calldataload(0x00))
                 // Emit the {Upgraded} event.
                 log2(0x00, 0x00, _BEACON_UPGRADED_EVENT_SIGNATURE, calldataload(0x00))
@@ -65,7 +65,7 @@ contract ZKsyncERC1967BeaconProxy {
             // Query the beacon.
             mstore(0x00, 0x5c60da1b) // `implementation()`.
             let s := staticcall(gas(), sload(_ERC1967_BEACON_SLOT), 0x1c, 0x04, 0x00, 0x20)
-            if iszero(and(gt(returndatasize(), 0x1f), s)) { invalid() }
+            if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
             let implementation := mload(0x00)
             // Perform the delegatecall.
             calldatacopy(0x00, 0x00, calldatasize())
