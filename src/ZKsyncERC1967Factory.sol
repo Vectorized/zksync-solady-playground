@@ -7,6 +7,22 @@ import {ZKsyncERC1967BeaconProxy} from "./ZKsyncERC1967BeaconProxy.sol";
 
 /// @notice A factory for deploying minimal ERC1967 proxies on ZKsync.
 /// @author Solady (https://github.com/vectorized/solady/blob/main/src/utils/ext/zksync/ZKsyncERC1967Factory.sol)
+///
+/// @dev The canonical address of the factory is stored in  `ZKsyncERC1967FactoryConstants.sol`.
+///
+/// Recommended usage:
+/// - In your NFT or ERC20 launchpad, you will use this contract as an
+///   interface to a storage variable containing the canonical address.
+/// ```
+///     address instance = ZKsyncERC1967Factory(_getStorage().factory)
+///         .deployProxyDeterministic(implementation, admin, salt);
+/// ```
+/// - In you test code, you will construct this factory and pass it into your contract.
+/// ```
+///     launchpad.setERC1967Factory(address(new ZKsyncERC1967Factory()));
+/// ```
+/// - In production, you can use the canonical address instead of redeploying this factory again.
+/// - Due to how ZKsync works, it is infeasible to make this into an inlineable library.
 contract ZKsyncERC1967Factory {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                       CUSTOM ERRORS                        */
