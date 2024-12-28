@@ -11,15 +11,15 @@ import {ZKsyncERC1967BeaconProxy} from "./ZKsyncERC1967BeaconProxy.sol";
 /// @dev The canonical address of the factory is stored in  `ZKsyncERC1967FactoryConstants.sol`.
 ///
 /// Recommended usage:
-/// - In your NFT or ERC20 launchpad, you will use this contract as an
+/// - In your launchpad (NFT or ERC20), you will use this contract as an
 ///   interface to a storage variable containing the canonical address.
 /// ```
 ///     address instance = ZKsyncERC1967Factory(_getStorage().factory)
 ///         .deployProxyDeterministic(implementation, admin, salt);
 /// ```
-/// - In you test code, you will construct this factory and pass it into your contract.
+/// - In your test code, you will construct this factory and pass it into your mock launchpad.
 /// ```
-///     launchpad.setERC1967Factory(address(new ZKsyncERC1967Factory()));
+///     mockLaunchpad.setERC1967Factory(address(new ZKsyncERC1967Factory()));
 /// ```
 /// - In production, you can use the canonical address instead of redeploying this factory again.
 /// - Due to how ZKsync works, it is infeasible to make this into an inlineable library.
@@ -89,15 +89,15 @@ contract ZKsyncERC1967Factory {
 
     /// @dev The hash of the proxy.
     bytes32 public constant PROXY_HASH =
-        0x01000041235eb6c6e003c5e0191695f009ed2590e899a662cb693bf85e8fb022;
+        0x01000041e96874f46c27bb7e89fb48bf7aea96eda2043a939367624f9eeefa81;
 
     /// @dev The hash of the upgradeable beacon.
     bytes32 public constant BEACON_HASH =
-        0x0100001901442d36d6e35ba0454223ed52727c75cb12e9646ea46ee78a24ae62;
+        0x01000019c8b0847cec43e8668fcbe8c8888e79017aec10c178decd064b64ba78;
 
     /// @dev The hash of the beacon proxy.
     bytes32 public constant BEACON_PROXY_HASH =
-        0x0100004dd6ba616b61acec35fbf9874af5fbc2691cfba34f6f47877ac601955a;
+        0x0100004dbdd988eeaa5fe2884f59f52061d05067d049c8976c40855c0425fd91;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                      ADMIN FUNCTIONS                       */
@@ -175,13 +175,13 @@ contract ZKsyncERC1967Factory {
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     /// @dev Deploys a proxy for `implementation`, with `admin`, and returns its address.
-    /// The value passed into this function will be forwarded to the proxu.
+    /// The value passed into this function will be forwarded to the proxy.
     function deployProxy(address implementation, address admin) public payable returns (address) {
         return deployProxyAndCall(implementation, admin, _emptyData());
     }
 
     /// @dev Deploys a proxy for `implementation`, with `admin`, and returns its address.
-    /// The value passed into this function will be forwarded to the proxu.
+    /// The value passed into this function will be forwarded to the proxy.
     /// Then, calls the proxy with abi encoded `data`.
     function deployProxyAndCall(address implementation, address admin, bytes calldata data)
         public

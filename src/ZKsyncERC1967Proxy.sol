@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-/// @notice A sufficiently minimal ERC1967 proxy tailored made for ZKsync.
+/// @notice A sufficiently minimal ERC1967 proxy tailor-made for ZKsync.
 /// @author Solady (https://github.com/vectorized/solady/blob/main/src/utils/ext/zksync/ZKsyncERC1967Proxy.sol)
 contract ZKsyncERC1967Proxy {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                           EVENTS                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    /// @dev Emitted when the proxy's implementation is upgraded.
+    /// @dev Emitted when the implementation of the proxy is upgraded.
     event Upgraded(address indexed implementation);
 
     /// @dev `keccak256(bytes("Upgraded(address)"))`.
@@ -48,7 +48,7 @@ contract ZKsyncERC1967Proxy {
         /// @solidity memory-safe-assembly
         assembly {
             mstore(0x40, 0) // Optimization trick to remove free memory pointer initialization.
-            // For the special case of 1-byte calldata, return the implementation.
+            // In the special case of 1-byte calldata, return the implementation.
             if eq(calldatasize(), 1) {
                 mstore(0x00, sload(_ERC1967_IMPLEMENTATION_SLOT))
                 return(0x00, 0x20)
