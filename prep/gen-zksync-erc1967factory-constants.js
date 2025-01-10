@@ -10,11 +10,11 @@ async function main() {
   const getJSONPath = contractName => 'zkout/' + contractName + '.sol/' + contractName + '.json';
   const getHash = contractName => ('0x' + JSON.parse(readSync(getJSONPath(contractName))).hash).replace(/^(0x)+/g, '0x');
 
-  const srcPath = 'src/ZKsyncERC1967Factory.sol';
+  const srcPath = 'src/utils/ext/zksync/ERC1967Factory.sol';
   const contractNamesAndConstants = {
-    'ZKsyncUpgradeableBeacon': 'BEACON_HASH',
-    'ZKsyncERC1967Proxy': 'PROXY_HASH',
-    'ZKsyncERC1967BeaconProxy': 'BEACON_PROXY_HASH'
+    'UpgradeableBeacon': 'BEACON_HASH',
+    'ERC1967Proxy': 'PROXY_HASH',
+    'ERC1967BeaconProxy': 'BEACON_PROXY_HASH'
   };
   let src = readSync(srcPath);
   for (const contractName in contractNamesAndConstants) {

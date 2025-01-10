@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import "../src/ZKsyncERC1967Factory.sol";
+import "../src/utils/ext/zksync/ERC1967Factory.sol";
 
 contract SampleImplementation {
     uint256 public x;
@@ -36,8 +36,8 @@ contract SampleImplementation2 is SampleImplementation {
     }
 }
 
-contract ZKsyncERC1967FactoryTest is Test {
-    ZKsyncERC1967Factory public factory;
+contract ERC1967FactoryTest is Test {
+    ERC1967Factory public factory;
     address public implementation;
     address public implementation2;
 
@@ -45,14 +45,14 @@ contract ZKsyncERC1967FactoryTest is Test {
     event LogBytes(bytes x);
 
     function setUp() public {
-        factory = new ZKsyncERC1967Factory();
+        factory = new ERC1967Factory();
         implementation = address(new SampleImplementation());
         implementation2 = address(new SampleImplementation2());
     }
 
     function testDeployDeterministicAndUpgrade() public {
         bytes32 salt = 0x0000000000000000000000000000000000000000ff112233445566778899aabb;
-        address predicted = factory.predictDeterministicAddress(factory.PROXY_HASH(), salt);
+        address predicted = factory.predictDeterministicAddress(factory.proxyHash(), salt);
         assertEq(factory.implementationOf(predicted), address(0));
         address instance = factory.deployProxyDeterministic(implementation, address(this), salt);
         assertEq(factory.implementationOf(predicted), implementation);
@@ -71,14 +71,14 @@ contract ZKsyncERC1967FactoryTest is Test {
 
     function testDeployBeaconProxyDeterministicAndUpgrade() public {
         bytes32 salt = 0x0000000000000000000000000000000000000000ff112233445566778899aabb;
-        address predicted = factory.predictDeterministicAddress(factory.BEACON_HASH(), salt);
+        address predicted = factory.predictDeterministicAddress(factory.beaconHash(), salt);
         assertEq(factory.implementationOf(predicted), address(0));
         address beacon = factory.deployBeaconDeterministic(implementation, address(this), salt);
-        assertEq(ZKsyncUpgradeableBeacon(beacon).implementation(), implementation);
+        assertEq(UpgradeableBeacon(beacon).implementation(), implementation);
         assertEq(factory.implementationOf(predicted), implementation);
         assertEq(predicted, beacon);
 
-        predicted = factory.predictDeterministicAddress(factory.BEACON_PROXY_HASH(), salt);
+        predicted = factory.predictDeterministicAddress(factory.beaconProxyHash(), salt);
         address beaconProxy = factory.deployBeaconProxyDeterministic(beacon, salt);
         assertEq(predicted, beaconProxy);
         assertEq(factory.implementationOf(beaconProxy), implementation);
