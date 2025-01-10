@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-/// @notice A sufficiently minimal upgradeable beacon tailored made for ZKsync.
+/// @notice A sufficiently minimal upgradeable beacon tailor-made for ZKsync.
 /// @author Solady (https://github.com/vectorized/solady/blob/main/src/utils/ext/zksync/ZKsyncUpgradeableBeacon.sol)
 contract ZKsyncUpgradeableBeacon {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                           EVENTS                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    /// @dev Emitted when the proxy's implementation is upgraded.
+    /// @dev Emitted when the implementation of the beacon is upgraded.
     event Upgraded(address indexed implementation);
 
     /// @dev `keccak256(bytes("Upgraded(address)"))`.
@@ -20,17 +20,17 @@ contract ZKsyncUpgradeableBeacon {
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     /// @dev To store the implementation.
-    uint256 private __implementation;
+    uint256 private _implementation;
 
     /// @dev For upgrades / initialization.
-    uint256 private __deployer;
+    uint256 private _deployer;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                        CONSTRUCTOR                         */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     constructor() payable {
-        __deployer = uint256(uint160(msg.sender));
+        _deployer = uint256(uint160(msg.sender));
     }
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
@@ -42,7 +42,7 @@ contract ZKsyncUpgradeableBeacon {
     function implementation() public view returns (address result) {
         /// @solidity memory-safe-assembly
         assembly {
-            result := sload(__implementation.slot)
+            result := sload(_implementation.slot)
         }
     }
 
@@ -53,8 +53,8 @@ contract ZKsyncUpgradeableBeacon {
             let newImplementation := calldataload(0x00)
             // Revert if the caller is not the deployer. We will still allow the implementation
             // to be set to an empty contract for simplicity.
-            if iszero(eq(caller(), sload(__deployer.slot))) { revert(0x00, 0x00) }
-            sstore(__implementation.slot, newImplementation)
+            if iszero(eq(caller(), sload(_deployer.slot))) { revert(0x00, 0x00) }
+            sstore(_implementation.slot, newImplementation)
             // Emit the {Upgraded} event.
             log2(0x00, 0x00, _UPGRADED_EVENT_SIGNATURE, newImplementation)
         }

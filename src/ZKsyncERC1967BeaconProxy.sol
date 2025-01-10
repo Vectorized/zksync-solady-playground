@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-/// @notice A sufficiently minimal ERC1967 beacon proxy tailored made for ZKsync.
+/// @notice A sufficiently minimal ERC1967 beacon proxy tailor-made for ZKsync.
 /// @author Solady (https://github.com/vectorized/solady/blob/main/src/utils/ext/zksync/ZKsyncERC1967BeaconProxy.sol)
 contract ZKsyncERC1967BeaconProxy {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                           EVENTS                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    /// @dev Emitted when the proxy's beacon is upgraded.
+    /// @dev Emitted when the beacon of the proxy is upgraded.
     event BeaconUpgraded(address indexed beacon);
 
     /// @dev `keccak256(bytes("BeaconUpgraded(address)"))`.
@@ -48,7 +48,7 @@ contract ZKsyncERC1967BeaconProxy {
         /// @solidity memory-safe-assembly
         assembly {
             mstore(0x40, 0) // Optimization trick to remove free memory pointer initialization.
-            // For the special case of 1-byte calldata, return the implementation.
+            // In the special case of 1-byte calldata, return the implementation.
             if eq(calldatasize(), 1) {
                 mstore(0x00, 0x5c60da1b) // `implementation()`.
                 let s := staticcall(gas(), sload(_ERC1967_BEACON_SLOT), 0x1c, 0x04, 0x00, 0x20)
