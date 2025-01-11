@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-/// @notice A sufficiently minimal ERC1967 beacon proxy tailor-made for ZKsync.
-/// @author Solady (https://github.com/vectorized/solady/blob/main/src/utils/ext/zksync/ZKsyncERC1967BeaconProxy.sol)
-contract ZKsyncERC1967BeaconProxy {
+/// @notice A sufficiently minimal ERC1967 proxy tailor-made for ZKsync.
+/// @author Solady (https://github.com/vectorized/solady/blob/main/src/utils/ext/zksync/ERC1967Proxy.sol)
+contract ERC1967Proxy {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                           EVENTS                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    /// @dev Emitted when the beacon of the proxy is upgraded.
-    event BeaconUpgraded(address indexed beacon);
+    /// @dev Emitted when the proxy's implementation is upgraded.
+    event Upgraded(address indexed implementation);
 
-    /// @dev `keccak256(bytes("BeaconUpgraded(address)"))`.
-    uint256 private constant _BEACON_UPGRADED_EVENT_SIGNATURE =
-        0x1cf3b03a6cf19fa2baba4df148e9dcabedea7f8a5c07840e207e5c089be95d3e;
+    /// @dev `keccak256(bytes("Upgraded(address)"))`.
+    uint256 private constant _UPGRADED_EVENT_SIGNATURE =
+        0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                          STORAGE                           */
@@ -21,13 +21,13 @@ contract ZKsyncERC1967BeaconProxy {
 
     /// @dev The ERC-1967 storage slot for the implementation in the proxy.
     /// `uint256(keccak256("eip1967.proxy.implementation")) - 1`.
-    bytes32 internal constant _ERC1967_BEACON_SLOT =
-        0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50;
+    bytes32 internal constant _ERC1967_IMPLEMENTATION_SLOT =
+        0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
     /// @dev The storage slot for the deployer.
-    /// `uint256(keccak256("ZKsyncERC1967BeaconProxy.deployer")) - 1`.
-    bytes32 internal constant _ZKSYNC_ERC1967_BEACON_PROXY_DEPLOYER_SLOT =
-        0xa08abcd16f24dd6a09927c103ca70de95c1c04921998d0dac6edddd21549ba2d;
+    /// `uint256(keccak256("ERC1967Proxy.deployer")) - 1`.
+    bytes32 internal constant _ERC1967_PROXY_DEPLOYER_SLOT =
+        0xc20b8dda59e1f49cae9bbc6c3744edc7900ba02880cd7b33b5b82a96197202ba;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                        CONSTRUCTOR                         */
@@ -36,7 +36,7 @@ contract ZKsyncERC1967BeaconProxy {
     constructor() payable {
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(_ZKSYNC_ERC1967_BEACON_PROXY_DEPLOYER_SLOT, caller())
+            sstore(_ERC1967_PROXY_DEPLOYER_SLOT, caller())
         }
     }
 
@@ -48,28 +48,32 @@ contract ZKsyncERC1967BeaconProxy {
         /// @solidity memory-safe-assembly
         assembly {
             mstore(0x40, 0) // Optimization trick to remove free memory pointer initialization.
-            // In the special case of 1-byte calldata, return the implementation.
+            // For the special case of 1-byte calldata, return the implementation.
             if eq(calldatasize(), 1) {
-                mstore(0x00, 0x5c60da1b) // `implementation()`.
-                let s := staticcall(gas(), sload(_ERC1967_BEACON_SLOT), 0x1c, 0x04, 0x00, 0x20)
-                if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
-                return(0x00, 0x20) // Return the implementation.
+                mstore(0x00, sload(_ERC1967_IMPLEMENTATION_SLOT))
+                return(0x00, 0x20)
             }
             // Deployer workflow.
-            if eq(caller(), sload(_ZKSYNC_ERC1967_BEACON_PROXY_DEPLOYER_SLOT)) {
-                sstore(_ERC1967_BEACON_SLOT, calldataload(0x00))
+            if eq(caller(), sload(_ERC1967_PROXY_DEPLOYER_SLOT)) {
+                let newImplementation := calldataload(0x00)
+                sstore(_ERC1967_IMPLEMENTATION_SLOT, newImplementation)
+                if gt(calldatasize(), 0x20) {
+                    let n := sub(calldatasize(), 0x20)
+                    calldatacopy(0x00, 0x20, n)
+                    if iszero(delegatecall(gas(), newImplementation, 0x00, n, 0x00, 0x00)) {
+                        // Bubble up the revert if the call reverts.
+                        returndatacopy(0x00, 0x00, returndatasize())
+                        revert(0x00, returndatasize())
+                    }
+                }
                 // Emit the {Upgraded} event.
-                log2(0x00, 0x00, _BEACON_UPGRADED_EVENT_SIGNATURE, calldataload(0x00))
+                log2(0x00, 0x00, _UPGRADED_EVENT_SIGNATURE, newImplementation)
                 stop() // End the context.
             }
-            // Query the beacon.
-            mstore(0x00, 0x5c60da1b) // `implementation()`.
-            let s := staticcall(gas(), sload(_ERC1967_BEACON_SLOT), 0x1c, 0x04, 0x00, 0x20)
-            if iszero(and(gt(returndatasize(), 0x1f), s)) { revert(0x00, 0x00) }
-            let implementation := mload(0x00)
             // Perform the delegatecall.
+            let implementation := sload(_ERC1967_IMPLEMENTATION_SLOT)
             calldatacopy(0x00, 0x00, calldatasize())
-            s := delegatecall(gas(), implementation, 0x00, calldatasize(), 0x00, 0x00)
+            let s := delegatecall(gas(), implementation, 0x00, calldatasize(), 0x00, 0x00)
             returndatacopy(0x00, 0x00, returndatasize())
             if iszero(s) { revert(0x00, returndatasize()) }
             return(0x00, returndatasize())
