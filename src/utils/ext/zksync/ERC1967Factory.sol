@@ -421,7 +421,7 @@ contract ERC1967Factory {
         bytes32 emptyStringHash = keccak256("");
         /// @solidity memory-safe-assembly
         assembly {
-            // The following is essentially `keccak256(abi.encode(...))`.
+            // The following is `keccak256(abi.encode(...))`.
             let m := mload(0x40)
             mstore(m, prefix)
             mstore(add(m, 0x20), address())
@@ -445,7 +445,7 @@ contract ERC1967Factory {
                 mstore(0x00, 0xa3a58d1c) // `NoInitCodeHashFound()`.
                 revert(0x1c, 0x04)
             }
-            // The following is essentially `keccak256(abi.encodePacked(...))`.
+            // The following is `keccak256(abi.encodePacked(...))`.
             mstore8(0x00, 0xff) // Write the prefix.
             mstore(0x35, initCodeHash)
             mstore(0x01, shl(96, address()))
