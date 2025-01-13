@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import "../src/ZKsyncSafeTransferLib.sol";
+import "../src/utils/ext/zksync/SafeTransferLib.sol";
 
 contract Griefer {
     uint256 public receiveNumLoops;
@@ -39,7 +39,7 @@ contract Griefer {
     }
 }
 
-contract ZKsyncSafeTransferLibTest is Test {
+contract SafeTransferLibTest is Test {
     Griefer public griefer;
 
     function setUp() public {
@@ -49,11 +49,11 @@ contract ZKsyncSafeTransferLibTest is Test {
     function testForceSafeTransferETH() public {
         address vault;
         vm.deal(address(this), 1 ether);
-        vault = ZKsyncSafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
+        vault = SafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
         assertEq(address(griefer).balance, 0.1 ether);
 
         griefer.setReceiveNumLoops(1 << 128);
-        vault = ZKsyncSafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
+        vault = SafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
         assertEq(address(griefer).balance, 0.1 ether);
 
         griefer.setReceiveNumLoops(0);
@@ -61,14 +61,14 @@ contract ZKsyncSafeTransferLibTest is Test {
         assertEq(address(griefer).balance, 0.2 ether);
 
         griefer.setReceiveNumLoops(1 << 128);
-        vault = ZKsyncSafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
+        vault = SafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
 
         griefer.setReceiveNumLoops(0);
         griefer.execute(vault, "");
         assertEq(address(griefer).balance, 0.3 ether);
 
         griefer.setReceiveNumLoops(1 << 128);
-        vault = ZKsyncSafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
+        vault = SafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
 
         griefer.setReceiveNumLoops(0);
         griefer.execute(vault, abi.encodePacked(address(griefer)));
@@ -77,7 +77,7 @@ contract ZKsyncSafeTransferLibTest is Test {
         address anotherRecipient = address(new Griefer());
 
         griefer.setReceiveNumLoops(1 << 128);
-        vault = ZKsyncSafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
+        vault = SafeTransferLib.forceSafeTransferETH(address(griefer), 0.1 ether);
 
         griefer.setReceiveNumLoops(0);
         griefer.execute(vault, abi.encodePacked(address(anotherRecipient)));
